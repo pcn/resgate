@@ -5,7 +5,7 @@
   will be made available in the environment of subsequent parts of the
   process by storing the entire original message for troubleshooting
   and passing in the decoded parts into the appropriate queue
-  parts. E.g. with a pagerduty alert that comes from datadog or some
+  parts. E.g. with a pagerduty alert that comes from datadog or somew
   other service, the important data may be embedded in a message
   within the payload with one shape, but may have different data if it
   comes from e.g. prometheus-alerter. The idea here is that we should
@@ -14,9 +14,16 @@
   
   See https://developer.pagerduty.com/docs/webhooks/v2-overview/
   
-  Datalog? JMESpath (on the maybe safe assumption that everything will be json, or
+  JMESpath (on the maybe safe assumption that everything will be json, or
   json-representable? It's more familiar than datalog)
-  
+
+# Tags
+
+Every service will have a set of tags, which will be a key:value
+mapping of <string>:<string>. Some of the tags can be pulled from
+webhook-provided data, and some tags will be defined as overridable
+defaults. These should be separate.
+
 # Backend
 
 - Save rule
