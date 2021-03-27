@@ -104,3 +104,21 @@ I think that a generally useful process to help this can be created. The importa
 6. Every remediation event will also have an endpoint that can be provided with the remediation event ID as an 
    argument, which is capable of checking whether the task associated with the ID has completed.
 
+# Testing:
+In a virtualenv:
+```
+$ pip install -e .
+$ resgate-server
+
+```
+
+## Running
+
+Wherever you run this from needs the following directories:
+
+- 'plaster': DB of JMESpath for destructuring inbound alert webhooks, and rules
+- 'logs': event data will be put here
+- 'queues': as events come in, they'll be queued here, consumed and then more.
+
+
+ 

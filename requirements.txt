@@ -1,5 +1,10 @@
-sanic
-# arrdem.datalog
+# Aiohttp and recommended bits
+aiohttp[speedups] >= 3.1
+# PyWebIO for a hopefully stupidly easy way to run some things
+PyWebIO
+arrdem.datalog
 requests
 persist-queue
 jmespath
+pysqlite3
+toml==0.10.2
