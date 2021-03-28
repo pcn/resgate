@@ -1,3 +1,5 @@
 #!/usr/bin/env python3
 
-from resgate import webserver
+import webserver
+
+webserver.run_server()

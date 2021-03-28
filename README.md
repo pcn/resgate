@@ -116,9 +116,32 @@ $ resgate-server
 
 Wherever you run this from needs the following directories:
 
-- 'plaster': DB of JMESpath for destructuring inbound alert webhooks, and rules
-- 'logs': event data will be put here
-- 'queues': as events come in, they'll be queued here, consumed and then more.
+- 'plaster': DB of JMESpath for destructuring inbound alert webhooks, and 
+  rules (an old name for a band-aid. healing. Right.)
+- 'logs': program logs and event data will be put here
+- 'queues': as events come in, they'll be queued here, consumed and then removed.
 
 
- 
+Run the main migration:
+```
+ $ mkdir -p plaster
+ $ sqlite3 plaster/data.db '.read migrations/01-plaster.sql
+```
+
+Add some test data (from a sqlite3 CLI)
+```
+insert into rule_groups (name) values ("this is my first test")
+insert into rule_groups (name) values ("this is my second test")
+```
+
+And start it up:
+```
+PYTHONPATH=lib bin/run_webserver.py 
+```
+
+And add this rule from the "edit_rules" choice from [here]('http://localhost:8080/tool'):
+```
+# Write some datalog to name this
+rule_name(1 "This is my first test")
+rule_check_url("https:/localhost:8080/always_true")
+```
