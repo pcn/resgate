@@ -35,4 +35,5 @@ defaults. These should be separate.
 # Test services
 Most mocking tests can probably be done for the service by creating an
 endpoint that is `/testv1/<true|false>/<until>`. Using the timestamp format of 
-`%Y-%m-%d %H:%M:%S` which matches the sqlite default `datetime()` format.
+`%Y-%m-%d_%H:%M:%S` which almost the sqlite default `datetime()` format (except
+for the `_` which makes using this from the command line much simpler)
