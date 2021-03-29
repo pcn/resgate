@@ -3,6 +3,13 @@ plaster/
 logs/
 queues/
 
+# Local settings
+.python-version
+
+# Emacs temporary files
+*\#
+
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
