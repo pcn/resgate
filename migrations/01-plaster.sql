@@ -1,7 +1,8 @@
+-- Tables to do with rules and rule groups and define webhooks
 create table webhooks (
        id INTEGER primary key,
-       path TEXT NOT NULL,   -- The inbound path
-       extraction TEXT NOT NULL, -- jmespath to extract and map fields
+       name TEXT NOT NULL UNIQUE,
+       path TEXT NOT NULL UNIQUE,   -- The inbound path
        queue_name TEXT NOT NULL
        );
 
