@@ -10,7 +10,7 @@ pip install -U -r requirements-test.py
 pip install -U -r requirements-dev.py
 pip install -U -r requirements.py
 pip install -U -e .
-adev runserver lib/webserver_buttontest.py
+adev runserver lib/webserver.py
     
 # echo "Not using sanic for now, using aiohttp to try out pywebio so use"
 # echo "run_webserver.sh"
