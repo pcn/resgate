@@ -88,6 +88,11 @@ def edit_webhook():
         if selected_hook != 0:
             my_hook = extractions.get_webhook(selected_hook)
         my_extractor = extractions.get_hook_extractor(selected_hook)
+
+    def test_extractor(uex_data):
+        put_text(f"data is {uex_data}")
+
+        # extractions.apply_extractor_to_message
     updated_extractor = input_group( "Hook data and hook extractor", [
         input('name', type=TEXT, name='name', value=my_hook['name'], required=True),  # Need to get a way to carry around the IDs
         input('path', type=TEXT, name='path', value=my_hook['path'], required=True),  # Need to get a way to carry around the IDs
@@ -99,11 +104,13 @@ def edit_webhook():
         textarea('Edit an extraction rule', name='extractor', rows=10, code={
             'mode': "python",  # code language
             'theme': 'darcula',  # Codemirror theme. Visit https://codemirror.net/demo/theme.html#cobalt to get more themes
-        }, value=my_extractor['extractor']),
+        }, value=my_extractor['extractor'], action=('test', test_extractor(locals()))),
         actions('actions', [
-            {'label': 'test', 'value':'test'},
+#            {'label': 'test', 'value':'test'},
             {'label': 'save', 'value':'save'},
-        ], name='action', help_text='Save or test')
+        ], name='action', help_text='Save or test'),
+        # put_buttons(['test'], onclick=partial(test_extractor, (locals()))),
+
     ]) # I suspect that this is going to just test the existing data, not somethign that was just typed in, which is really the way
     # Pretty much can't be none, but let's follow the example from
     # https://pywebio.readthedocs.io/en/latest/input.html#pywebio.input.actions
