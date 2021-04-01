@@ -28,7 +28,7 @@ async def hello_world(request):
     return web.Response(text="Hello, world!")
 
 
-# It'd probablyb e better to namespace this in a v1 file or such?
+# It'd probably be better to namespace this in a v1 file or such?
 @routes.post("/v1/webhook/{hook}")
 async def v1_webhook(request):
     """
