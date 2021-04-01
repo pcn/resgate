@@ -25,6 +25,17 @@ import rules
 
 routes = web.RouteTableDef()
 
+DEFAULT_HOOK = {
+    "name": "Enter a new name",
+    "path": "Enter the path for this hook",
+    "queue_name": "Enter the queue name",
+}
+
+DEFAULT_EXTRACTOR = {
+    "example": "# New hook example as json - lines beginning with a '#' will be ignored and preserved",
+    "extractor": "# New hook extractor: write some jmespath - lines beginning with a '#' will be ignored and preserved",
+}
+
 
 def edit_rules():
     """Edit rules
@@ -55,20 +66,47 @@ def test_extractor(uex_data):
     # put_text(f"data is {uex_data}")
     # The signature according to https://pywebio.readthedocs.io/en/latest/input.html?highlight=actions#pywebio.input.input_group
     # only supports one invalid thing at a time.
+    failures = list()
     if uex_data["action"].lower() == "test":
         with popup("Applying the example to the extractor"):
             try:
+                if uex_data["name"] == DEFAULT_HOOK["name"]:
+                    put_text("You need to provide a unique name for this hook")
+                    failures.append(["name", "Name is not changed from the default"])
+                if uex_data["path"] == DEFAULT_HOOK["path"]:
+                    put_text("You need to provide a unique path for this hook")
+                    failures.append(
+                        [
+                            "path",
+                            "The path for the webhook is not changed from the default",
+                        ]
+                    )
+                if uex_data["queue_name"] == DEFAULT_HOOK["queue_name"]:
+                    put_text("You need to provide a unique queue_name for this hook")
+                    failures.append(
+                        [
+                            "queue_name",
+                            "The queue_name for the webhook is not changed from the default",
+                        ]
+                    )
                 put_text(
                     extractions.apply_extractor_to_message(
                         uex_data["example"], uex_data["extractor"]
                     )
                 )
-            except (
-                json.decoder.JSONDecodeError,
-                jmesex.IncompleteExpressionError,
-            ) as e:
-                put_text(f"That didn't validate! The error returned is {str(e)}")
+            except json.decoder.JSONDecodeError as e:
+                put_text(f"The json didn't validate! The error returned is {str(e)}")
+                failures.append(["example", "The example json didn't check out"])
+            except (jmesex.IncompleteExpressionError, jmesex.EmptyExpressionError) as e:
+                put_text(
+                    f"The jmespath expression didn't validate! The error returned is {str(e)}"
+                )
+                failures.append(
+                    ["extractor", "The jmespath expression didn't check out"]
+                )
         # return [(k, "Test was run") for k, v in uex_data.items()][0]
+        if failures:
+            return (failures[0][0], failures[0][1])
         return ("actions", "test was run")
     return None
 
@@ -92,7 +130,7 @@ def edit_webhook():
     )
 
     print(my_hooks)
-    selected_hook = select(
+    selected_hook_id = select(
         label="Existing webhooks",
         options=[
             {
@@ -103,20 +141,17 @@ def edit_webhook():
         ],
     )
     # Rules have unique IDs from the database:
-    logging.info(f"selected_hook: {selected_hook}")
+    logging.info(f"selected_hook: {selected_hook_id}")
 
-    if selected_hook == 0:
-        my_extractor = {
-            "example": "# New hook example as json - lines beginning with a '#' will be ignored and preserved",
-            "extractor": "# New hook extractor: write some jmespath - lines beginning with a '#' will be ignored and preserved",
-        }
-    else:
-        # XXX this doesn't get the hook text from the db, nor does it save it yet
-        if selected_hook != 0:
-            my_hook = extractions.get_webhook(selected_hook)
-        my_extractor = extractions.get_hook_extractor(selected_hook)
+    my_hook = dict()
+    my_extractor = dict()
+    my_hook.update(DEFAULT_HOOK)
+    my_extractor.update(DEFAULT_EXTRACTOR)
+    if selected_hook_id != 0:
+        my_hook = extractions.get_webhook(selected_hook_id)
+        my_extractor = extractions.get_hook_extractor(selected_hook_id)
 
-        # extractions.apply_extractor_to_message
+    # TODO: update validator to avoid default hook 0 names
     updated_extractor = input_group(
         "Hook data and hook extractor",
         [
@@ -171,7 +206,7 @@ def edit_webhook():
         uex = dict(updated_extractor)
         if uex["action"] == "save":
             webhook_info = extractions.save_webhook(
-                selected_hook, uex["name"], uex["path"], uex["queue_name"]
+                selected_hook_id, uex["name"], uex["path"], uex["queue_name"]
             )
             extractor_info = extractions.save_extractor(
                 uex["name"], webhook_info["id"], uex["extractor"], uex["example"]
