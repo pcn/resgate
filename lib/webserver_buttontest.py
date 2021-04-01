@@ -45,3 +45,6 @@ def run_server():
 
 
 app.add_routes(routes)
+
+if __name__ == '__main__':
+    run_server()

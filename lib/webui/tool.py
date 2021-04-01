@@ -33,12 +33,27 @@ def edit_rules():
     put_text(f'The rule added is: {updated_rule}')
 
 
+def test_extractor(uex_data):
+    # put_text(f"data is {uex_data}")
+    # The signature according to https://pywebio.readthedocs.io/en/latest/input.html?highlight=actions#pywebio.input.input_group
+    # only supports one invalid thing at a time.
+    if uex_data['action'].lower() == 'test':
+        with popup('Applying the example to the extractor'):
+            put_text(extractions.apply_extractor_to_message(
+                uex_data['example'],
+                uex_data['extractor']))
+
+        # return [(k, "Test was run") for k, v in uex_data.items()][0]
+        return ('actions', 'test was run')
+    return None
+
+
 
 
 def edit_webhook():
-    """Edit webhook
+    """Edit webhook and its extractor
 
-    This should be changed to work with a programatticaly named
+    This should be changed to work with a programattically named
     webhook that has a randmoly named inbound address. For now, we
     name it I guess
 
@@ -121,5 +136,42 @@ def edit_webhook():
             put_text(f'{webhook_info} {extractor_info}')
             # Use webhook_info's ID to add/update the extractor
 
+
+def button_stuff():
+    """Without the complexity of doing anything else, try to enable popup buttons.
+
+    Do it"""
+    my_hooks = extractions.get_all_webhooks()
+    selected_hook_dict = [h for h in my_hooks if h['name'] == 'good'][0]
+    selected_hook_id=selected_hook_dict['id']
+
+    # XXX this doesn't get the hook text from the db, nor does it save it yet
+    my_hook = extractions.get_webhook(selected_hook_id)
+    my_extractor = extractions.get_hook_extractor(selected_hook_id)
+
+    updated_extractor = input_group(
+        "Hook data and hook extractor", [
+        textarea('Example message', name='example', rows=10, code={
+            'mode': "python",  # code language
+            'theme': 'darcula',  # Codemirror theme. Visit https://codemirror.net/demo/theme.html#cobalt to get more themes
+        }, value=my_extractor['example']),
+        textarea('Edit an extraction rule', name='extractor', rows=10, code={
+            'mode': "python",  # code language
+            'theme': 'darcula',  # Codemirror theme. Visit https://codemirror.net/demo/theme.html#cobalt to get more themes
+        }, value=my_extractor['extractor']),
+        actions('actions', [
+            {'label': 'test', 'value':'test'},
+            {'label': 'save', 'value':'save'},
+        ], name='action', help_text='Run tests until you get the output you expect, then save'),
+        # put_buttons(['test'], onclick=partial(test_extractor, (locals()))),
+
+        ], validate=test_extractor) # I suspect that this is going to just test the existing data, not somethign that was just typed in, which is really the way
+    put_text(updated_extractor)
+
 app = web.Application()
-app.add_routes([web.get('/tool', webio_handler({'edit_rules': edit_rules, 'edit_webhook': edit_webhook}))])
+app.add_routes([web.get('/tool',
+                        webio_handler({
+                            'edit_rules': edit_rules,
+                            'edit_webhook': edit_webhook,
+                            'button_stuff': button_stuff
+                        }))])
