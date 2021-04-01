@@ -1,7 +1,7 @@
-from json.decoder import JSONDecodeError
+import json.decoder
 import logging
-from functools import partial
 import json
+import pprint
 
 from aiohttp import web
 from pywebio.platform.aiohttp import static_routes, webio_handler
@@ -14,6 +14,7 @@ from pywebio.output import (
     put_html,
     close_popup,
     put_code,
+    put_row
 )
 import arrow
 
@@ -67,46 +68,46 @@ def test_extractor(uex_data):
     # The signature according to https://pywebio.readthedocs.io/en/latest/input.html?highlight=actions#pywebio.input.input_group
     # only supports one invalid thing at a time.
     failures = list()
-    if uex_data["action"].lower() == "test":
-        with popup("Applying the example to the extractor"):
-            try:
-                if uex_data["name"] == DEFAULT_HOOK["name"]:
-                    put_text("You need to provide a unique name for this hook")
-                    failures.append(["name", "Name is not changed from the default"])
-                if uex_data["path"] == DEFAULT_HOOK["path"]:
-                    put_text("You need to provide a unique path for this hook")
-                    failures.append(
-                        [
-                            "path",
-                            "The path for the webhook is not changed from the default",
-                        ]
-                    )
-                if uex_data["queue_name"] == DEFAULT_HOOK["queue_name"]:
-                    put_text("You need to provide a unique queue_name for this hook")
-                    failures.append(
-                        [
-                            "queue_name",
-                            "The queue_name for the webhook is not changed from the default",
-                        ]
-                    )
-                put_text(
-                    extractions.apply_extractor_to_message(
-                        uex_data["example"], uex_data["extractor"]
-                    )
-                )
-            except json.decoder.JSONDecodeError as e:
-                put_text(f"The json didn't validate! The error returned is {str(e)}")
-                failures.append(["example", "The example json didn't check out"])
-            except (jmesex.IncompleteExpressionError, jmesex.EmptyExpressionError) as e:
-                put_text(
-                    f"The jmespath expression didn't validate! The error returned is {str(e)}"
-                )
+
+    with popup("Applying the example to the extractor"):
+        try:
+            if uex_data["name"] == DEFAULT_HOOK["name"]:
+                put_text("You need to provide a unique name for this hook")
+                failures.append(["name", "Name is not changed from the default"])
+            if uex_data["path"] == DEFAULT_HOOK["path"]:
+                put_text("You need to provide a unique path for this hook")
                 failures.append(
-                    ["extractor", "The jmespath expression didn't check out"]
+                    [
+                        "path",
+                        "The path for the webhook is not changed from the default",
+                    ]
                 )
-        # return [(k, "Test was run") for k, v in uex_data.items()][0]
-        if failures:
-            return (failures[0][0], failures[0][1])
+            if uex_data["queue_name"] == DEFAULT_HOOK["queue_name"]:
+                put_text("You need to provide a unique queue_name for this hook")
+                failures.append(
+                    [
+                        "queue_name",
+                        "The queue_name for the webhook is not changed from the default",
+                    ]
+                )
+            put_text(
+                extractions.apply_extractor_to_message(
+                    uex_data["example"], uex_data["extractor"]
+                )
+            )
+        except json.decoder.JSONDecodeError as e:
+            put_text(f"The json didn't validate! The error returned is {str(e)}")
+            failures.append(["example", "The example json didn't check out"])
+        except (jmesex.IncompleteExpressionError, jmesex.EmptyExpressionError, jmesex.ParseError) as e:
+            put_text(
+                f"The jmespath expression didn't validate! The error returned is {str(e)}"
+            )
+            failures.append(
+                ["extractor", "The jmespath expression didn't check out"]
+            )
+    if failures:
+        return (failures[0][0], failures[0][1])
+    if uex_data["action"].lower() == "test":
         return ("actions", "test was run")
     return None
 
@@ -211,58 +212,11 @@ def edit_webhook():
             extractor_info = extractions.save_extractor(
                 uex["name"], webhook_info["id"], uex["extractor"], uex["example"]
             )
-            put_text(f"{webhook_info} {extractor_info}")
+            put_row(put_text("Webhook"))
+            put_row(put_code(pprint.pformat(webhook_info, indent=1)))
+            put_row(put_text("Extractor"))
+            put_row(put_code(pprint.pformat(extractor_info, indent=1)))
             # Use webhook_info's ID to add/update the extractor
-
-
-def button_stuff():
-    """Without the complexity of doing anything else, try to enable popup buttons.
-
-    Do it"""
-    my_hooks = extractions.get_all_webhooks()
-    selected_hook_dict = [h for h in my_hooks if h["name"] == "good"][0]
-    selected_hook_id = selected_hook_dict["id"]
-
-    # XXX this doesn't get the hook text from the db, nor does it save it yet
-    my_hook = extractions.get_webhook(selected_hook_id)
-    my_extractor = extractions.get_hook_extractor(selected_hook_id)
-
-    updated_extractor = input_group(
-        "Hook data and hook extractor",
-        [
-            textarea(
-                "Example message",
-                name="example",
-                rows=10,
-                code={
-                    "mode": "python",  # code language
-                    "theme": "darcula",  # Codemirror theme. Visit https://codemirror.net/demo/theme.html#cobalt to get more themes
-                },
-                value=my_extractor["example"],
-            ),
-            textarea(
-                "Edit an extraction rule",
-                name="extractor",
-                rows=10,
-                code={
-                    "mode": "python",  # code language
-                    "theme": "darcula",  # Codemirror theme. Visit https://codemirror.net/demo/theme.html#cobalt to get more themes
-                },
-                value=my_extractor["extractor"],
-            ),
-            actions(
-                "actions",
-                [
-                    {"label": "test", "value": "test"},
-                    {"label": "save", "value": "save"},
-                ],
-                name="action",
-                help_text="Run tests until you get the output you expect, then save",
-            ),
-        ],
-        validate=test_extractor,
-    )  # I suspect that this is going to just test the existing data, not somethign that was just typed in, which is really the way
-    put_text(updated_extractor)
 
 
 app = web.Application()
