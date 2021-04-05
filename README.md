@@ -145,3 +145,20 @@ And add this rule from the "edit_rules" choice from [here]('http://localhost:808
 rule_name(1 "This is my first test")
 rule_check_url("https:/localhost:8080/always_true")
 ```
+
+
+# Special rules that will be used by the system
+
+Any rule names can be created as part of the evaluation of the rules to develop the desired 
+outcomes.
+
+The end result can include a number of rules that will be used to determine the behavior of the 
+system. Some are required to achieve any effect, some are optional.
+
+TODO: add default/minimums
+
+
+* fix_url('<url>', '<all extractor keys>')
+* fix_min_time('<number of seconds, minimum, before the next fix of this type will be kicked off>')
+* todo: something to determine queue suffix/naming/etc 
+* 

@@ -6,6 +6,7 @@ import arrow
 
 import extractions
 import rules
+import api
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
@@ -20,22 +21,16 @@ from webui import tool
 app.add_subapp('/ui', tool.app)
 
 
+from apiv1 import app as appv1
+app.add_subapp('/v1', appv1)
+
+
 @routes.get("/")
 async def hello_world(request):
     """
     Just a test endpoint
     """
     return web.Response(text="Hello, world!")
-
-
-# It'd probably be better to namespace this in a v1 file or such?
-@routes.post("/v1/webhook/{hook}")
-async def v1_webhook(request):
-    """
-    A webhook that will accept a message
-    """
-    hook = request.match_info.get('hook')
-    return web.Response(text=f"This could be a webhook! for the hook {hook}")
 
 
 
