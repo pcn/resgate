@@ -49,6 +49,7 @@ def save_extractor(name, hook_id, extractor_text, example_message):
     return get_extractor_by_hook_id(hook_id)
 
 
+# XXX: Here or webhooks?
 def apply_extractor_to_message(message, extractor):
     """Remove comment lines from the input message and extractor,
     then Apply a jmespath extractor the provided message, and return the resulting mapping"""

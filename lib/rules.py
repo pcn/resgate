@@ -68,3 +68,4 @@ def evaluate_rule(id_=0, name="", starting_data={}):
     input_ = reader.read(rule_text)
     state = easy.select(starting_facts_db, rule_text)
     print(rules)
+    return rules

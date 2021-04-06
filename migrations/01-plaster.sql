@@ -3,7 +3,8 @@ create table webhooks (
        id INTEGER primary key,
        name TEXT NOT NULL UNIQUE,
        path TEXT NOT NULL UNIQUE,   -- The inbound path
-       queue_name TEXT NOT NULL
+       queue_name TEXT NOT NULL,
+       entry_rule_name TEXT
        );
 
 -- create table rule_map ( -- map a webhook to its entry point rule

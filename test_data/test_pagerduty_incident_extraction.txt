@@ -1,0 +1,4 @@
+{ service_name: messages[0].incident.service.name, incident_id: messages[0].incident.id }
+# jmespath to extract data from the test hook provided by pagerduty.
+# This should only read one line for testing, so putting the comment here at the bottom
+# The real code will join everything in an extractor into one string
