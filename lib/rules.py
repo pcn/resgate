@@ -2,7 +2,6 @@
 # This is just the persistence and editing of rules.
 
 import logging
-import sqlite3
 from datalog import easy, reader
 
 import utils
@@ -62,10 +61,11 @@ def evaluate_rule(id_=0, name="", starting_data={}):
     """
     rule = get_rule(id_=id_, name=name)
     # Create the initial db
-    starting_facts_db = reader.read("".join(
-        [f"starting({k}, {v})." for k, v in starting_data.items()]))
-    rule_text = utils.remove_commented_lines(rule['text'])
+    start_with = "\n".join([f'starting("{k}", "{v}").' for k, v in starting_data.items()])
+    logging.debug(f"doing a start_with of {start_with}")
+    starting_facts_db = reader.read(start_with)
+    rule_text = utils.remove_commented_lines(rule['rule'])
+    logging.debug(f"starting_facts_db is {starting_facts_db}")
     input_ = reader.read(rule_text)
     state = easy.select(starting_facts_db, rule_text)
-    print(rules)
-    return rules
+    return state
